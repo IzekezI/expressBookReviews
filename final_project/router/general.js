@@ -12,20 +12,46 @@ public_users.post("/register", (req,res) => {
 
 // Get the book list available in the shop
 public_users.get('/',function (req, res) {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+  books = JSON.stringify({books});
+  return res.status(300).json({message: `Here are your books ${books}`});
 });
 
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn',function (req, res) {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
- });
-  
-// Get book details based on author
-public_users.get('/author/:author',function (req, res) {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+  const isbn = req.params.isbn;
+  if (isbn) {
+    return res.send(books[isbn]);
+  } else {
+    return res.status(404).json({message: `Invalid ISBN`});
+  }
+}); 
+
+// Route to get book details based on author
+router.get('/author/:author', function (req, res) {
+    const authorName = req.params.author;
+    const booksArray = Object.values(books);
+    res.send(booksArray);
+    
+    // 2. Filter the booksArray
+    const foundBooks = booksArray.filter(book => 
+        // Check if author exists and if it matches the name (case-insensitive)
+        book.author && book.author.toLowerCase() === authorName
+    );
+
+    res.send(foundBooks)
+    // 3. Check for results and send the appropriate response
+    if (foundBooks.length > 0) {
+        // Success: Send the array of matching books
+        return res.status(200).json({
+            author: req.params.author,
+            books: foundBooks
+        }); 
+    } else {
+        // Error: Send a 404 Not Found response
+        return res.status(404).json({ 
+            message: `No books found for author: ${req.params.author}` 
+        });
+    }
 });
 
 // Get all books based on title
@@ -36,7 +62,7 @@ public_users.get('/title/:title',function (req, res) {
 
 //  Get book review
 public_users.get('/review/:isbn',function (req, res) {
-  //Write your code here
+  
   return res.status(300).json({message: "Yet to be implemented"});
 });
 
