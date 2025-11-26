@@ -50,7 +50,7 @@ public_users.get('/',function (req, res) {
 
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn',function (req, res) {
-    const isbn = req.params.isbn;
+    let isbn = req.params.isbn;
     if (isbn) {
       return res.send(books[isbn]);
     } else {
@@ -59,30 +59,81 @@ public_users.get('/isbn/:isbn',function (req, res) {
 });
   
 // Get book details based on author
-public_users.get('/author/:author',function (req, res) {
-  const authorName = req.params.author;
-  const booksArray = Object.values(books);
-
-  const foundBook = booksArray.filter (book => book.author === authorName);
-  res.send(foundBook);
+public_users.get('/author/:author',async function (req, res) {
+    // Write your code here
+    let author = req.params.author;
+    let booksByAuthor = [];
+  
+    try {
+      // Assuming the API endpoint for getting all books is http://localhost:5000/books
+      const response = await axios.get('http://localhost:5000/books');
+  
+      for (let isbn in response.data) {
+        if (response.data[isbn].author == author) {
+          booksByAuthor.push(response.data[isbn]);
+        }
+      }
+  
+      if (booksByAuthor.length > 0) {
+        return res.status(200).send(JSON.stringify(booksByAuthor, null, 4));
+      } else {
+        return res.status(404).send("No book found with author " + author);
+      }
+    } catch (error) {
+      // Handle errors, e.g., network issues or API errors
+      console.error(error);
+      return res.status(500).send("Internal Server Error");
+    }
 });
+  
 
 // Get all books based on title
-public_users.get('/title/:title',function (req, res) {
-    const bookTitle = req.params.title;
-    const booksArray = Object.values(books);
+public_users.get('/title/:title',async function (req, res) {
+    // Write your code here
+    let title = req.params.title;
+    let booksByTitle = [];
   
-    const foundBook = booksArray.filter (book => book.title === bookTitle);
-    res.send(foundBook);
+    try {
+      // Assuming the API endpoint for getting all books is http://localhost:5000/books
+      const response = await axios.get('http://localhost:5000/books');
+  
+      for (let isbn in response.data) {
+        if (response.data[isbn].title == title) {
+          booksByTitle.push(response.data[isbn]);
+        }
+      }
+  
+      if (booksByTitle.length > 0) {
+        return res.status(200).send(JSON.stringify(booksByTitle, null, 4));
+      } else {
+        return res.status(404).send("No book found with title " + title);
+      }
+    } catch (error) {
+      // Handle errors, e.g., network issues or API errors
+      console.error(error);
+      return res.status(500).send("Internal Server Error");
+    }
 });
+  
 
 //  Get book review
-public_users.get('/review/:isbn',function (req, res) {
-    const bookReviews = req.params.reviews;
-    const booksArray = Object.values(books);
+public_users.get('/review/:isbn',async function (req, res) {
+    // Write your code here
+    let isbn = req.params.isbn;
   
-    const foundBook = booksArray.filter (book => book.reviews === bookReviews);
-    res.send(foundBook);
+    try {
+      const response = await axios.get('http://localhost:5000/books');
+  
+      if (response.data[isbn]) {
+        return res.status(200).send(JSON.stringify(response.data[isbn], null, 4));
+      } else {
+        return res.status(404).send("No book found with ISBN " + isbn);
+      }
+    } catch (error) {
+      // Handle errors, e.g., network issues or API errors
+      console.error(error);
+      return res.status(500).send("Internal Server Error");
+    }  
 });
 
 module.exports.general = public_users;
